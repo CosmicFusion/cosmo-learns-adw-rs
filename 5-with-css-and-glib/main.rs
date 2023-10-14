@@ -135,7 +135,7 @@ fn build_ui(app: &adw::Application) {
 fn print_why(label: &Label) {
     // takes the aurgument from "_click_me_button.connect_clicked" which should be a label amd sets its text to "Why would you :("
     label.set_text("Why would you :(");
-    label.add_css_class("midLabelWARN");
+    label.add_css_class("bigREDTEXT");
 }
 
 // Save current window size to glib
