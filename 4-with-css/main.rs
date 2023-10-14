@@ -6,14 +6,27 @@ use gtk::*;
 use adw::prelude::*;
 use adw::*;
 use glib::*;
+use gdk::Display;
 
 
 /// main function
 fn main() {
     let application = adw::Application::new(Some("com.github.adw-rs-test.cosmo"), Default::default());
     application.connect_startup(|app| {
+        // The CSS "magic" happens here.
+        let provider = CssProvider::new();
+        provider.load_from_data(include_str!("style.css"));
+        // We give the CssProvided to the default screen so the CSS rules we added
+        // can be applied to our window.
+        gtk::style_context_add_provider_for_display(
+            &Display::default().expect("Could not connect to a display."),
+            &provider,
+            STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+
         app.connect_activate(build_ui);
     });
+    
     application.run();
 }
 
@@ -92,8 +105,6 @@ fn build_ui(app: &adw::Application) {
         // Minimum Size/Default
         .width_request(700)
         .height_request(500)
-        // Hide window instead of destroy
-        .hide_on_close(true)
         // Startup
         .startup_id("cosmo-adw-test")
         // build the window
@@ -109,10 +120,7 @@ fn build_ui(app: &adw::Application) {
     /// print_why() -> print_why(&_warning_label)
     _click_me_button.connect_clicked(move |_| print_why(&_warning_label));
         
-    // Connect the hiding of window to the save_window_size function and window destruction
-    window.connect_hide(clone!(@weak window => move |_| save_window_size(&window, &glib_settings)));
-    window.connect_hide(clone!(@weak window => move |_| window.destroy()));
-    
+        
     // show the window
     window.show()
 }
@@ -122,14 +130,5 @@ fn build_ui(app: &adw::Application) {
 fn print_why(label: &Label) {
     // takes the aurgument from "_click_me_button.connect_clicked" which should be a label amd sets its text to "Why would you :("
     label.set_text("Why would you :(");
-}
-
-// Save current window size to glib
-fn save_window_size(window: &adw::ApplicationWindow, glib_settings: &gio::Settings) {
-        
-        let size = window.default_size();
-        
-        glib_settings.set_int("window-width", size.0);
-        glib_settings.set_int("window-height", size.1);
-        glib_settings.set_boolean("is-maximized", window.is_maximized());
+    label.add_css_class("midLabelWARN");
 }
